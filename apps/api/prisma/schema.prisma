@@ -1,0 +1,69 @@
+// Prisma schema for gmach_project (equipment lending)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  CANCELED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String   @unique
+  role      UserRole @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id          String  @id @default(uuid())
+  name        String
+  category    String
+  description String?
+  quantity    Int     @default(1)
+  imageUrl    String?
+  notes       String?
+
+  loans       Loan[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Loan {
+  id                 String     @id @default(uuid())
+  status             LoanStatus @default(ACTIVE)
+
+  borrowerName       String
+  borrowerPhone      String
+  startDate          DateTime
+  expectedReturnDate DateTime
+  actualReturnDate   DateTime?
+
+  notes              String?
+
+  itemId             String
+  item               Item       @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@index([itemId])
+  @@index([status])
+  @@index([startDate, expectedReturnDate])
+}
