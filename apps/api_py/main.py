@@ -74,7 +74,7 @@ def create_item(payload: ItemCreate):
 @app.put("/items/{item_id}")
 def update_item(item_id: str, payload: ItemUpdate):
     # keep only provided fields (exclude None)
-    data: Dict[str, Any] = payload.model_dump(exclude_none=True)
+    data: Dict[str, Any] = payload.model_dump(exclude_unset=True)
 
     if not data:
         raise HTTPException(status_code=400, detail="No fields provided to update")
