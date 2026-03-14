@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
@@ -13,6 +13,14 @@ class ItemCreate(BaseModel):
     category: str
     description: Optional[str] = None
     quantity: int = 1
+    imageUrl: Optional[str] = None
+    notes: Optional[str] = None
+
+class ItemUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    quantity: Optional[int] = None
     imageUrl: Optional[str] = None
     notes: Optional[str] = None
 
@@ -57,6 +65,50 @@ def create_item(payload: ItemCreate):
             row = cur.fetchone()
             conn.commit()
             return row
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.put("/items/{item_id}")
+def update_item(item_id: str, payload: ItemUpdate):
+    # keep only provided fields (exclude None)
+    data: Dict[str, Any] = payload.model_dump(exclude_none=True)
+
+    if not data:
+        raise HTTPException(status_code=400, detail="No fields provided to update")
+
+    allowed_fields = {"name", "category", "description", "quantity", "imageUrl", "notes"}
+    unknown = set(data.keys()) - allowed_fields
+    if unknown:
+        raise HTTPException(status_code=400, detail=f"Unknown fields: {sorted(list(unknown))}")
+
+    # build dynamic UPDATE ... SET "field"=%s, ... , "updatedAt"=NOW()
+    set_clauses = []
+    values = []
+    for key, value in data.items():
+        set_clauses.append(f'"{key}" = %s')
+        values.append(value)
+
+    set_sql = ", ".join(set_clauses) + ', "updatedAt" = NOW()'
+    values.append(item_id)
+
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f'UPDATE "Item" SET {set_sql} WHERE "id" = %s RETURNING *;',
+                tuple(values),
+            )
+            row = cur.fetchone()
+            if row is None:
+                raise HTTPException(status_code=404, detail="Item not found")
+            conn.commit()
+            return row
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
