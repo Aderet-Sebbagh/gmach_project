@@ -4,11 +4,15 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from datetime import datetime
+
 from db import get_conn
 from loans import router as loans_router
+from calendar_routes import router as calendar_router
 
 app = FastAPI(title="gmach_project API (Python)")
 app.include_router(loans_router)
+app.include_router(calendar_router)
 
 class ItemCreate(BaseModel):
     name: str
@@ -133,5 +137,26 @@ def delete_item(item_id: str):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.get("/items/available")
+def available_items(startDate: datetime, expectedReturnDate: datetime):
+    if startDate > expectedReturnDate:
+        raise HTTPException(status_code=400, detail="Invalid date range: startDate must be <= expectedReturnDate")
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT i.*, i."quantity" - COALESCE(COUNT(l."id"), 0) AS "availableCount"
+                FROM "Item" i
+                LEFT JOIN "Loan" l ON l."itemId" = i."id" AND l."status" = 'ACTIVE'::"LoanStatus" 
+                AND DATE(l."startDate") <= DATE(%s) AND DATE(%s) <= DATE(l."expectedReturnDate") 
+                GROUP BY i."id" 
+                HAVING (i."quantity" - COALESCE(COUNT(l."id"),0)) > 0 
+                ORDER BY i."createdAt" DESC
+                ''', (expectedReturnDate, startDate))
+            rows = cur.fetchall()
+            return rows
     finally:
         conn.close()

@@ -32,6 +32,28 @@ def create_loan(payload: LoanCreate):
         with conn.cursor() as cur:
             cur.execute(
                 '''
+                SELECT COUNT(*) AS cnt 
+                FROM "Loan" 
+                WHERE "itemId" = %s AND "status" = 'ACTIVE'::"LoanStatus" AND DATE("startDate") <= DATE(%s) AND DATE(%s) <= DATE("expectedReturnDate")
+                ''',
+                (payload.itemId, payload.expectedReturnDate, payload.startDate)
+                )
+            row = cur.fetchone()
+            active_overlap_count = int(row["cnt"])
+            cur.execute(
+                '''
+                SELECT "quantity" 
+                FROM "Item" 
+                WHERE "id" = %s
+                ''', (payload.itemId,))
+            item_row = cur.fetchone()
+            if item_row is None:
+                raise HTTPException(404, "Item not found")
+            quantity = item_row["quantity"]
+            if active_overlap_count >= quantity:
+                raise HTTPException(status_code=409, detail=f"Item not available in requested dates ({active_overlap_count} active overlapping loans of {quantity})")
+            cur.execute(
+                '''
                 INSERT INTO "Loan"
                   ("id", "itemId", "borrowerName", "borrowerPhone", "startDate", "expectedReturnDate", "notes", "updatedAt")
                 VALUES
