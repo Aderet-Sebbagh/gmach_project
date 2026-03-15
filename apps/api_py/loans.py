@@ -138,4 +138,20 @@ def cancel_loan(loan_id: str):
     finally:
         conn.close()
 
+@router.get("/{loan_id}")
+def get_loan(loan_id: str):
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('''
+                    SELECT * FROM "Loan"
+                    WHERE "id" = %s
+                    ''', (loan_id,))
+            row = cur.fetchone()
+            if row is None:
+                raise HTTPException(status_code=404, detail="Loan not found")
+            return row
+    finally:
+        conn.close()
+
 
