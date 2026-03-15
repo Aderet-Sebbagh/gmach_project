@@ -86,7 +86,7 @@ def create_loan(payload: LoanCreate):
                 ''', (payload.itemId,))
             item_row = cur.fetchone()
             if item_row is None:
-                raise HTTPException(status_code=404, detail="Loan not found")
+                raise HTTPException(status_code=404, detail="Item not found")
             quantity = item_row["quantity"]
             if active_overlap_count >= quantity:
                 raise HTTPException(status_code=409, detail=f"Item not available in requested dates ({active_overlap_count} active overlapping loans of {quantity})")
@@ -164,7 +164,7 @@ def cancel_loan(loan_id: str):
                 status_row = cur.fetchone()
                 if status_row is None:
                     raise HTTPException(status_code=404, detail="Loan not found")
-                raise HTTPException(409, "Cannot cancel a returned loan")
+                raise HTTPException(status_code=409, detail="Cannot cancel a returned loan")
             conn.commit()
             return row
     except HTTPException:
