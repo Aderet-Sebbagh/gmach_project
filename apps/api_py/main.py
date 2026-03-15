@@ -5,8 +5,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from db import get_conn
+from loans import router as loans_router
 
 app = FastAPI(title="gmach_project API (Python)")
+app.include_router(loans_router)
 
 class ItemCreate(BaseModel):
     name: str
