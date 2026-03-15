@@ -9,10 +9,13 @@ from datetime import datetime
 from db import get_conn
 from loans import router as loans_router
 from calendar_routes import router as calendar_router
+from items_routes import router as items_router
+
 
 app = FastAPI(title="gmach_project API (Python)")
 app.include_router(loans_router)
 app.include_router(calendar_router)
+app.include_router(items_router)
 
 class ItemCreate(BaseModel):
     name: str
