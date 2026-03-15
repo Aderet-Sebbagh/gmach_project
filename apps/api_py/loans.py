@@ -105,4 +105,37 @@ def return_loan(loan_id: str):
     finally:
             conn.close()
 
+@router.patch("/{loan_id}/cancel")
+def cancel_loan(loan_id: str):
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute('''
+                UPDATE "Loan"
+                SET "status" = 'CANCELED'::"LoanStatus", "updatedAt" = NOW()
+                WHERE "id" = %s AND "status" != 'RETURNED'::"LoanStatus"
+                RETURNING *;
+                ''', (loan_id,))
+            row = cur.fetchone()
+            if row is None:
+                cur.execute('''
+                            SELECT "status" 
+                            FROM "Loan" 
+                            WHERE "id" = %s
+                            ''', (loan_id,))
+                status_row = cur.fetchone()
+                if status_row is None:
+                    raise HTTPException(404, "Loan not found")
+                raise HTTPException(409, "Cannot cancel a returned loan")
+            conn.commit()
+            return row
+    except HTTPException:
+        conn.rollback()
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(500, detail=str(e))
+    finally:
+        conn.close()
+
 
