@@ -1,9 +1,11 @@
 from typing import Optional
 from uuid import uuid4
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from db import get_conn
 from datetime import datetime
+
+from auth_deps import get_current_user, require_admin
 
 router = APIRouter(prefix="/loans", tags=["loans"])
 
@@ -16,7 +18,7 @@ class LoanCreate(BaseModel):
     notes: Optional[str] = None
 
 @router.get("")
-def list_loans(status: Optional[str] = None, fromDate: Optional[datetime] = None, toDate: Optional[datetime] = None):
+def list_loans(status: Optional[str] = None, fromDate: Optional[datetime] = None, toDate: Optional[datetime] = None, admin = Depends(require_admin)):
     if fromDate is None and toDate is not None or fromDate is not None and toDate is None:
         raise HTTPException(status_code=400, detail="Provide both fromDate and toDate, or neither")
     if fromDate is not None and toDate is not None and fromDate > toDate:
@@ -63,7 +65,7 @@ def list_loans(status: Optional[str] = None, fromDate: Optional[datetime] = None
         conn.close()
 
 @router.post("", status_code=201)
-def create_loan(payload: LoanCreate):
+def create_loan(payload: LoanCreate, user = Depends(get_current_user)):
     conn = get_conn()
     try:
         new_id = str(uuid4())
@@ -118,17 +120,17 @@ def create_loan(payload: LoanCreate):
         conn.close()
 
 @router.patch("/{loan_id}/return")
-def return_loan(loan_id: str):
+def return_loan(loan_id: str, admin = Depends(require_admin)):
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            SQL_UPDATE = '''
-                UPDATE "Loan"
-                  SET "status" = 'RETURNED'::"LoanStatus", "actualReturnDate" = NOW(), "updatedAt" = NOW()
-                WHERE "id" = %s
-                RETURNING *;
-                '''
-            cur.execute(SQL_UPDATE, (loan_id,))
+            cur.execute('''
+                    UPDATE "Loan"
+                    SET "status" = 'RETURNED'::"LoanStatus", "actualReturnDate" = NOW(), "updatedAt" = NOW()
+                    WHERE "id" = %s
+                    RETURNING *;
+                    '''
+                    , (loan_id,))
             row = cur.fetchone()
             if row is None:
                 raise HTTPException(status_code=404, detail="Loan not found")
@@ -144,7 +146,7 @@ def return_loan(loan_id: str):
             conn.close()
 
 @router.patch("/{loan_id}/cancel")
-def cancel_loan(loan_id: str):
+def cancel_loan(loan_id: str, admin = Depends(require_admin)):
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -177,7 +179,7 @@ def cancel_loan(loan_id: str):
         conn.close()
 
 @router.get("/{loan_id}")
-def get_loan(loan_id: str):
+def get_loan(loan_id: str, admin = Depends(require_admin)):
     conn = get_conn()
     try:
         with conn.cursor() as cur:
