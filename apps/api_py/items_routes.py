@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from uuid import uuid4
 
+from auth_deps import get_current_user, get_token
 
 router = APIRouter(prefix="/items", tags=["items"])
 
