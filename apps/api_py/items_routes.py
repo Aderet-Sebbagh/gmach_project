@@ -27,7 +27,7 @@ class ItemUpdate(BaseModel):
     notes: Optional[str] = None
 
 @router.get("")
-def list_items(user = Depends(get_current_user)):
+def list_items():
     conn = get_conn()
     try:
         with conn.cursor() as cur:
@@ -133,7 +133,7 @@ def delete_item(item_id: str, admin = Depends(require_admin)):
         conn.close()
 
 @router.get("/available")
-def available_items(startDate: datetime, expectedReturnDate: datetime, user = Depends(get_current_user)):
+def available_items(startDate: datetime, expectedReturnDate: datetime):
     if startDate > expectedReturnDate:
         raise HTTPException(status_code=400, detail="Invalid date range: startDate must be <= expectedReturnDate")
     conn = get_conn()
@@ -154,7 +154,7 @@ def available_items(startDate: datetime, expectedReturnDate: datetime, user = De
         conn.close()
 
 @router.get("/{item_id}/availability")
-def item_availability(item_id: str, startDate: datetime, expectedReturnDate: datetime,user = Depends(get_current_user)):
+def item_availability(item_id: str, startDate: datetime, expectedReturnDate: datetime):
     if startDate > expectedReturnDate:
         raise HTTPException(status_code=400, detail="Invalid date range: startDate must be <= expectedReturnDate")
 
