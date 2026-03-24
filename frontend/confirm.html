@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אישור השאלה - מערכת ניהול גמ"ח</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="page-header">
+            <h1>אישור השאלה</h1>
+            <p>בדקי את הפרטים לפני שליחה</p>
+        </header>
+
+        <main class="confirm-main">
+            <section class="confirm-summary-card">
+                <h2>סיכום הבקשה</h2>
+                <p id="confirmDatesMessage">טוען תאריכים...</p>
+                <p id="confirmCartMessage">טוען פריטים...</p>
+                <div id="confirmItemsList" class="confirm-items-list"></div>
+            </section>
+
+            <section class="confirm-form-card">
+                <h2>פרטי הלווה</h2>
+
+                <form id="confirmForm">
+                    <div class="form-group">
+                        <label for="borrowerName">שם הלווה</label>
+                        <input type="text" id="borrowerName" name="borrowerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="borrowerPhone">טלפון הלווה</label>
+                        <input type="text" id="borrowerPhone" name="borrowerPhone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmNotes">הערות כלליות</label>
+                        <input type="text" id="confirmNotes" name="confirmNotes">
+                    </div>
+
+                    <button type="submit">אישור סופי ושליחה</button>
+                </form>
+
+                <p id="confirmMessage"></p>
+
+                <div class="confirm-actions">
+                    <a class="home-button" href="cart.html">חזרה לסל</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="confirm.js"></script>
+</body>
+</html>

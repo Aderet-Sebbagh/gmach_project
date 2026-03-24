@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="he", dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סל השאלה - מערכת ניהול גמ"ח</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="page-header">
+            <h1>סל השאלה</h1>
+            <p>כאן ניתן לצפות בפריטים שנבחרו להשאלה</p>
+        </header>
+
+        <main class="items-main">
+            <section class="items-filter-card">
+                <h2>פרטי הבקשה</h2>
+                <p id="cartDatesMessage">טוען תאריכים...</p>
+            </section>
+
+            <section class="cart-items-card">
+                <h2>פריטים שנבחרו</h2>
+                <p id="cartMessage">טוען סל...</p>
+                <div id="cartItemsList" class="cart-items-list"></div>
+                <div class="cart-actions">
+                    <a class="home-button" href="items.html">חזרה להוספת פריטים</a>
+                    <a class="home-button" href="confirm.html">המשך לאישור</a>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="cart.js"></script>
+</body>
+</html>

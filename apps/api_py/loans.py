@@ -113,11 +113,13 @@ def create_loan(payload: LoanCreate, user = Depends(get_current_user)):
             row = cur.fetchone()
             conn.commit()
             return row
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         raise HTTPException(500, detail=str(e))
-    finally:
-        conn.close()
+
 
 @router.patch("/{loan_id}/return")
 def return_loan(loan_id: str, admin = Depends(require_admin)):

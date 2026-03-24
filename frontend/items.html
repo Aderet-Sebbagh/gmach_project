@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="he", dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>"פריטים - מערכת לניהול גמ"ח</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page">
+        <header class="page-header">
+            <h1>פריטי הגמ"ח</h1>
+            <p>כאן ניתן לצפות בפריטים הקיימים במערכת</p>
+            
+            <div class="items-top-actions">
+                <a class="home-button" href="cart.html">מעבר לסל</a>
+                <p id="cartCountMessage"></p>
+            </div>
+        </header>
+
+        <main class="items-main">
+            <section class="items-filter-card">
+                <h2>סינון פריטים</h2>
+
+                <form id="availabilityForm">
+                    <div class="form-group">
+                        <label for="startDate">תאריך התחלה</label>
+                        <input type="date" id="startDate" name="startDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expectedReturnDate">תאריך החזרה צפוי</label>
+                        <input type="date" id="expectedReturnDate" name="expectedReturnDate">
+                    </div>
+                    
+                    <button type="submit">הצג פריטים זמינים</button>
+                    <button type="button" id="showAllItemsButton">הצג את כל הפריטים</button>
+                </form>
+
+                <p id="itemsFilterMessage"></p>
+            </section>
+
+            <section class="items-status-section">
+                <p id="itemsMessage">טוען פריטים...</p>
+            </section>
+
+            <section id="itemsList" class="items-list">
+            </section>
+        </main>
+
+    </div>
+    <script src="items.js"></script>
+</body>
+</html>
