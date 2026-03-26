@@ -99,12 +99,11 @@ confirmForm.addEventListener("submit", async function (event) {
     }
 
     localStorage.removeItem("cart");
-    confirmMessage.textContent = "ההשאלה נשלחה בהצלחה והסל נוקה";
+    window.location.href = "success.html";
 }
-
-catch (error) {
-    confirmMessage.textContent = "שגיאה בחיבור לשרת";
-    console.error(error);
-}
+    catch (error) {
+        confirmMessage.textContent = "שגיאה בחיבור לשרת";
+        console.error(error);
+    }
 
 });
